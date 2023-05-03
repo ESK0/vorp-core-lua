@@ -1,7 +1,6 @@
 Namedinstances = {}
 
-RegisterServerEvent("vorp_core:instanceplayers")
-AddEventHandler("vorp_core:instanceplayers", function(setRoom)
+RegisterServerEvent("vorp_core:instanceplayers", function(setRoom)
     local src = source
     local instanceSource = nil
 
@@ -18,19 +17,21 @@ AddEventHandler("vorp_core:instanceplayers", function(setRoom)
             end
         end
         instanceSource = setRoom
+
     else
         for k, v in pairs(Namedinstances) do
             if v.name == setRoom then
                 instanceSource = k
+                break
             end
         end
 
-        if instanceSource == nil then
+        if not instanceSource then
             instanceSource = setRoom
 
             while Namedinstances[instanceSource] and #Namedinstances[instanceSource] >= 1 do
                 instanceSource = setRoom
-                Citizen.Wait(1)
+                Wait(1)
             end
         end
     end
@@ -46,10 +47,7 @@ AddEventHandler("vorp_core:instanceplayers", function(setRoom)
         table.insert(Namedinstances[instanceSource].people, src)
     end
 
-    SetPlayerRoutingBucket(
-        src,
-        instanceSource
-    )
+    SetPlayerRoutingBucket(src, instanceSource)
 end)
 
 -- credits to MrDankKetchup
