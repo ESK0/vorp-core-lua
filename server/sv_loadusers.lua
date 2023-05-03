@@ -14,32 +14,28 @@ function LoadUser(source, setKickReason, deferrals, identifier, license)
             local currentTime = tonumber(os.time(os.date("!*t")))
 
             if bannedUntilTime == 0 then
-                deferrals.done("You are banned permanently!")
-                setKickReason("You are banned permanently!")
+                deferrals.done('You are banned permanently!')
+                setKickReason('You are banned permanently!')
+
             elseif bannedUntilTime > currentTime then
-                local bannedUntil = os.date(Config.Langs.DateTimeFormat,
-                    bannedUntilTime + Config.TimeZoneDifference * 3600)
+                local bannedUntil = os.date(Config.Langs.DateTimeFormat, bannedUntilTime + Config.TimeZoneDifference * 3600)
                 deferrals.done(Config.Langs.BannedUser .. bannedUntil .. Config.Langs.TimeZone)
                 setKickReason(Config.Langs.BannedUser .. bannedUntil .. Config.Langs.TimeZone)
+
             else
                 local getuser = GetUserId(identifier)
-                TriggerEvent("vorpbans:addtodb", false, getuser, 0)
+                TriggerEvent('vorpbans:addtodb', false, getuser, 0)
             end
         end
 
-        if Config.UseCharPermission then
-            _users[identifier] = User(source, identifier, user["group"], user["warnings"], license, user["char"])
-        else
-            _users[identifier] = User(source, identifier, user["group"], user["warnings"], license, false)
-        end
-
+        _users[identifier] = User(source, identifier, user.group, user.warnings, license, Config.UseCharPermission and user.char or false)
         _users[identifier].LoadCharacters()
-
         deferrals.done()
+
     else
         --New User
-        MySQL.insert("INSERT INTO users VALUES(?,?,?,?,?,?)", { identifier, "user", 0, 0, 0, "false" })
-        _users[identifier] = User(source, identifier, "user", 0, license)
+        db.insertNewUser({identifier, 'user', 0, 0, 0, 'false'})
+        _users[identifier] = User(source, identifier, 'user', 0, license)
         deferrals.done()
     end
 end
@@ -63,6 +59,7 @@ AddEventHandler('playerDropped', function()
             _users[identifier].GetUsedCharacter().StaminaOuter(_healthData[identifier].sOuter)
             _users[identifier].GetUsedCharacter().StaminaInner(_healthData[identifier].sInner)
         end
+
         _users[identifier].SaveUser(pCoords, pHeading)
         if Config.PrintPlayerInfoOnLeave then
             print('Player ^2' .. steamName .. ' ^7steam:^3 ' .. identifier .. '^7 saved')
@@ -71,8 +68,7 @@ AddEventHandler('playerDropped', function()
     end
 
     if Config.SaveSteamNameDB then
-        MySQL.update('UPDATE characters SET `steamname` = ? WHERE `identifier` = ? ',
-            { steamName, identifier })
+        MySQL.update('UPDATE characters SET `steamname` = ? WHERE `identifier` = ? ', { steamName, identifier })
     end
 end)
 
@@ -197,8 +193,7 @@ AddEventHandler('vorp:SaveStamina', function(staminaOuter, staminaInner)
     end
 end)
 
-RegisterNetEvent('vorp:HealthCached')
-AddEventHandler('vorp:HealthCached', function(healthOuter, healthInner, staminaOuter, staminaInner)
+RegisterNetEvent('vorp:HealthCached', function(healthOuter, healthInner, staminaOuter, staminaInner)
     local _source = source
     local identifier = GetSteamID(_source)
 
@@ -212,8 +207,7 @@ AddEventHandler('vorp:HealthCached', function(healthOuter, healthInner, staminaO
     _healthData[identifier].sInner = staminaInner
 end)
 
-RegisterNetEvent("vorp:GetValues")
-AddEventHandler("vorp:GetValues", function()
+RegisterNetEvent("vorp:GetValues", function()
     local healthData = {}
     local _source = source
     local identifier = GetSteamID(_source)
@@ -226,11 +220,9 @@ AddEventHandler("vorp:GetValues", function()
     TriggerClientEvent("vorp:GetHealthFromCore", _source, healthData)
 end)
 
-
-
-Citizen.CreateThread(function()
+CreateThread(function()
     while true do
-        Citizen.Wait(Config.savePlayersTimer * 60000)             -- this should be above 10 minutes
+        Wait(Config.savePlayersTimer * 60000)             -- this should be above 10 minutes
         for k, v in pairs(_users) do
             if v.usedCharacterId and v.usedCharacterId ~= -1 then -- save only when player has selected char and save only that char
                 v.SaveUser()
@@ -239,8 +231,7 @@ Citizen.CreateThread(function()
     end
 end)
 
-
-AddEventHandler("vorpchar:addtodb", function(status, identifier)
+AddEventHandler('vorpchar:addtodb', function(status, identifier)
     local resultList = MySQL.prepare.await("SELECT * FROM users WHERE identifier = ?", { identifier })
     local char
     if resultList then
