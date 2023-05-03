@@ -11,11 +11,12 @@ end)
 RegisterServerEvent('vorp:TriggerServerCallback', function(name, requestId, args)
     local source = source
 
-    if ServerCallBacks[name] then
-        ServerCallBacks[name](source, function(data) -- index of table
-            TriggerClientEvent("vorp:ServerCallback", source, requestId, data)
-        end, args)
-    else
-        print('Callback ' .. name .. ' does not exist. make sure it matches client and server')
+    if not ServerCallBacks[name] then
+        print(('Callback %s does not exist. make sure it matches client and server'):format(name))
+        return
     end
+
+    ServerCallBacks[name](source, function(data) -- index of table
+        TriggerClientEvent('vorp:ServerCallback', source, requestId, data)
+    end, args)
 end)
