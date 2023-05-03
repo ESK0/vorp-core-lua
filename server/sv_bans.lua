@@ -1,4 +1,4 @@
-AddEventHandler("vorpbans:addtodb", function(status, id, datetime)
+AddEventHandler('vorpbans:addtodb', function(status, id, datetime)
     local sid = _whitelist[id].GetEntry().getIdentifier() --IdsToIdentifiers[id]
 
     if status == true then
@@ -15,49 +15,40 @@ AddEventHandler("vorpbans:addtodb", function(status, id, datetime)
         end
     end
 
-    MySQL.update("UPDATE users SET banned = @banned, banneduntil=@time WHERE identifier = @identifier",
-        { ['@banned'] = status, ['@time'] = datetime, ['@identifier'] = sid }, function(result)
-        end)
+    db.updateBan({status, datetime, sid})
 end)
 
-
-AddEventHandler("vorpwarns:addtodb", function(status, id)
+AddEventHandler('vorpwarns:addtodb', function(status, id)
     local sid = _whitelist[id].GetEntry().getIdentifier() --IdsToIdentifiers[id]
-
-    local resultList = MySQL.prepare.await("SELECT * FROM users WHERE identifier = ?", { sid })
-
-    local warnings
+    local warnings = 0
 
     if _users[sid] then
         local user = _users[sid].GetUser()
         warnings = user.getPlayerwarnings()
 
-        for _, player in ipairs(GetPlayers()) do
-            if sid == GetPlayerIdentifiers(player)[1] then
-                if status == true then
-                    TriggerClientEvent("vorp:Tip", player, Config.Langs["Warned"], 10000)
-                    warnings = warnings + 1
+        for _, target in ipairs(GetPlayers()) do
+            if sid == GetPlayerIdentifiers(target)[1] then
+                if status then
+                    TriggerClientEvent('vorp:Tip', target, Config.Langs.Warned, 10000)
+                    warnings += 1
                 else
-                    TriggerClientEvent("vorp:Tip", player, Config.Langs["Unwarned"], 10000)
-                    warnings = warnings - 1
+                    TriggerClientEvent('vorp:Tip', target, Config.Langs.Unwarned, 10000)
+                    warnings -= 1
                 end
                 break
             end
         end
 
         user.setPlayerWarnings(warnings)
+
     else
-        local user = resultList
-        warnings = user.warnings
-        if status == true then
-            warnings = warnings + 1
+        warnings = db.selectWarnings({sid})
+        if status then
+            warnings += 1
         else
-            warnings = warnings - 1
+            warnings -= 1
         end
     end
 
-
-    MySQL.update("UPDATE users SET warnings = @warnings WHERE identifier = @identifier",
-        { ['@warnings'] = warnings, ['@identifier'] = sid }, function(result)
-        end)
+    db.updateWarnings({warnings, sid})
 end)
