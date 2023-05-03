@@ -116,7 +116,7 @@ Config = {
     --=======================================================
     -- BAN SYSTEM
     DateTimeFormat           = "%d/%m/%y %H:%M:%S", -- Set wished DateTimeFormat for output in ban notification
-    TimeZone                 = " CET",              -- Set your timezone
+    TimeZone                 = "CET",              -- Set your timezone
     TimeZoneDifference       = 1,                   -- Your time zone difference with UTC in winter time this is used for the banning system
     --=======================================================
     -- COMMAND PERMISSION
@@ -171,7 +171,7 @@ Config = {
         RemoveChar         = "Removed Multicharacter ",
         WrongHex           = "Hex not in DB or Wrong Hex",
         myjob              = "your job is: ~o~",
-        mygrade            = " ~q~grade: ~o~",
+        mygrade            = "~q~grade: ~o~",
         charhours          = "your character hours is: ~o~ %d",
         playhours          = "hours played is: ~o~ %d",
         RespawnIn          = "You can respawn in ",
