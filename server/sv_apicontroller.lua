@@ -13,84 +13,86 @@ local function _getUsedCharacter(player)
         return nil
     end
 
-    local used_char = user.GetUsedCharacter() or nil
-
-    return used_char
+    return user.GetUsedCharacter() or nil
 end
 
 ---@param player number
 ---@return table|nil
 local function _getCharDetails(player)
     local used_char = _getUsedCharacter(player)
-
     if not used_char then
         return nil
     end
 
-    local char = used_char.getCharacter() or nil
-
-    return char
+    return used_char.getCharacter() or nil
 end
 
 AddEventHandler('vorp:getCharacter', function(player, cb)
     local char_details = _getCharDetails(player)
-
-    if char_details ~= nil then
-        cb(char_details)
+    if not char_details then
+        return
     end
+
+    cb(char_details)
 end)
 
 AddEventHandler('vorp:addMoney', function(player, typeCash, quantity)
     local used_char = _getUsedCharacter(player)
-
-    if used_char ~= nil then
-        used_char.addCurrency(typeCash, quantity)
-        used_char.updateCharUi()
+    if not used_char then
+        return
     end
+
+    used_char.addCurrency(typeCash, quantity)
+    used_char.updateCharUi()
 end)
 
 AddEventHandler('vorp:removeMoney', function(player, typeCash, quantity)
     local used_char = _getUsedCharacter(player)
-
-    if used_char ~= nil then
-        used_char.removeCurrency(typeCash, quantity)
-        used_char.updateCharUi()
+    if not used_char then
+        return
     end
+
+    used_char.removeCurrency(typeCash, quantity)
+    used_char.updateCharUi()
 end)
 
 AddEventHandler('vorp:addXp', function(player, quantity)
     local used_char = _getUsedCharacter(player)
-
-    if used_char ~= nil then
-        used_char.addXp(quantity)
-        used_char.updateCharUi()
+    if not used_char then
+        return
     end
+
+    used_char.addXp(quantity)
+    used_char.updateCharUi()
 end)
 
 AddEventHandler('vorp:removeXp', function(player, quantity)
     local used_char = _getUsedCharacter(player)
-
-    if used_char ~= nil then
-        used_char.removeXp(quantity)
-        used_char.updateCharUi()
+    if not used_char then
+        return
     end
+
+    used_char.removeXp(quantity)
+    used_char.updateCharUi()
 end)
 
 AddEventHandler('vorp:setJob', function(player, job, jobgrade)
     local used_char = _getUsedCharacter(player)
-
-    if used_char ~= nil then
-        used_char.setJob(job)
-        used_char.setJobGrade(jobgrade)
+    if not used_char then
+        return
     end
+
+    used_char.setJob(job)
+    used_char.setJobGrade(jobgrade)
 end)
 
 AddEventHandler('vorp:setGroup', function(player, group)
     local used_char = _getUsedCharacter(player)
-
-    if used_char ~= nil then
-        used_char.setGroup(group)
+    if not used_char then
+        return
     end
+
+    used_char.setGroup(group)
 end)
 
 AddEventHandler('vorp:whitelistPlayer', function(id)
@@ -105,21 +107,22 @@ AddEventHandler('getCore', function(cb)
     local coreData = {}
 
     coreData.getUser = function(source)
-        if source == nil then return nil end
-
-        local sid = GetSteamID(source)
-
-        if _users[sid] then
-            return _users[sid].GetUser()
-        else
+        if not source then
             return nil
         end
+
+        local sid = GetSteamID(source)
+        if not _users[sid] then
+            return nil
+        end
+
+        return _users[sid].GetUser()
     end
 
-    coreData.maxCharacters = Config["MaxCharacters"]
+    coreData.maxCharacters = Config.MaxCharacters
 
     coreData.addRpcCallback = function(name, callback)
-        TriggerEvent("vorp:addNewCallBack", name, callback)
+        TriggerEvent('vorp:addNewCallBack', name, callback)
     end
 
     coreData.getUsers = function()
@@ -127,93 +130,80 @@ AddEventHandler('getCore', function(cb)
     end
 
     coreData.Warning = function(text)
-        print("^3WARNING: ^7" .. tostring(text) .. "^7")
+        print('^3WARNING: ^7' .. tostring(text) .. '^7')
     end
 
     coreData.Error = function(text)
-        print("^1ERROR: ^7" .. tostring(text) .. "^7")
-        TriggerClientEvent("vorp_core:LogError")
+        print('^1ERROR: ^7' .. tostring(text) .. '^7')
+        TriggerClientEvent('vorp_core:LogError')
     end
 
     coreData.Success = function(text)
-        print("^2SUCCESS: ^7" .. tostring(text) .. "^7")
+        print('^2SUCCESS: ^7' .. tostring(text) .. '^7')
     end
 
     coreData.NotifyTip = function(source, text, duration)
-        local _source = source
-        TriggerClientEvent('vorp:Tip', _source, text, duration)
+        TriggerClientEvent('vorp:Tip', source, text, duration)
     end
 
     coreData.NotifyLeft = function(source, title, subtitle, dict, icon, duration, colors)
-        local _source = source
-        TriggerClientEvent('vorp:NotifyLeft', _source, title, subtitle, dict, icon, duration, colors)
+        TriggerClientEvent('vorp:NotifyLeft', source, title, subtitle, dict, icon, duration, colors)
     end
 
     coreData.NotifyRightTip = function(source, text, duration)
-        local _source = source
-        TriggerClientEvent('vorp:TipRight', _source, text, duration)
+        TriggerClientEvent('vorp:TipRight', source, text, duration)
     end
 
     coreData.NotifyObjective = function(source, text, duration)
-        local _source = source
-        TriggerClientEvent('vorp:TipBottom', _source, text, duration)
+        TriggerClientEvent('vorp:TipBottom', source, text, duration)
     end
 
     coreData.NotifyTop = function(source, text, location, duration)
-        local _source = source
-        TriggerClientEvent('vorp:NotifyTop', _source, text, location, duration)
+        TriggerClientEvent('vorp:NotifyTop', source, text, location, duration)
     end
 
     coreData.NotifySimpleTop = function(source, text, subtitle, duration)
-        local _source = source
-        TriggerClientEvent('vorp:ShowTopNotification', _source, text, subtitle, duration)
+        TriggerClientEvent('vorp:ShowTopNotification', source, text, subtitle, duration)
     end
 
     coreData.NotifyAvanced = function(source, text, dict, icon, text_color, duration, quality, showquality)
-        local _source = source
-        TriggerClientEvent('vorp:ShowAdvancedRightNotification', _source, text, dict, icon, text_color, duration, quality
-            , showquality)
+        TriggerClientEvent('vorp:ShowAdvancedRightNotification', source, text, dict, icon, text_color, duration, quality, showquality)
     end
 
     coreData.NotifyCenter = function(source, text, duration, color)
-        local _source = source
-        TriggerClientEvent('vorp:ShowSimpleCenterText', _source, text, duration, color)
+        TriggerClientEvent('vorp:ShowSimpleCenterText', source, text, duration, color)
     end
 
     coreData.NotifyBottomRight = function(source, text, duration)
-        local _source = source
-        TriggerClientEvent('vorp:ShowBottomRight', _source, text, duration)
+        TriggerClientEvent('vorp:ShowBottomRight', source, text, duration)
     end
 
     coreData.NotifyFail = function(source, text, subtitle, duration)
-        local _source = source
-        TriggerClientEvent('vorp:failmissioNotifY', _source, text, subtitle, duration)
+        TriggerClientEvent('vorp:failmissioNotifY', source, text, subtitle, duration)
     end
 
     coreData.NotifyDead = function(source, title, audioRef, audioName, duration)
-        local _source = source
-        TriggerClientEvent('vorp:deadplayerNotifY', _source, title, audioRef, audioName, duration)
+        TriggerClientEvent('vorp:deadplayerNotifY', source, title, audioRef, audioName, duration)
     end
 
     coreData.NotifyUpdate = function(source, title, subtitle, duration)
-        local _source = source
         TriggerClientEvent('vorp:updatemissioNotify', title, subtitle, duration)
     end
 
     coreData.NotifyWarning = function(source, title, msg, audioRef, audioName, duration)
-        local _source = source
-        TriggerClientEvent('vorp:warningNotify', _source, title, msg, audioRef, audioName, duration)
+        TriggerClientEvent('vorp:warningNotify', source, title, msg, audioRef, audioName, duration)
     end
 
     coreData.dbUpdateAddTables = function(tbl)
-        if VorpInitialized == true then
+        if VorpInitialized then
             print('Updates must be added before vorpcore is initiates')
         end
+
         dbupdaterAPI.addTables(tbl)
     end
 
     coreData.dbUpdateAddUpdates = function(updt)
-        if VorpInitialized == true then
+        if VorpInitialized then
             print('Updates must be added before vorpcore is initiates')
         end
         dbupdaterAPI.addUpdates(updt)
@@ -230,15 +220,16 @@ AddEventHandler('getWhitelistTables', function(cb)
     local whitelistData = {}
 
     whitelistData.getEntry = function(identifier)
-        if identifier == nil then return nil end
-
-        local userid = GetUserId(identifier)
-
-        if _whitelist[userid] then
-            return _whitelist[userid].GetEntry()
-        else
+        if not identifier then
             return nil
         end
+
+        local userid = GetUserId(identifier)
+        if not _whitelist[userid] then
+            return nil
+        end
+
+        return _whitelist[userid].GetEntry()
     end
 
     whitelistData.getEntries = function()
